@@ -6,16 +6,16 @@
 #include <queue>
 #include <unordered_map>
 #include <string>
+#include <vector>
 
-// This struct represents a single node in the Huffman tree
+// Node structure for Huffman tree
 struct Node {
-    char character;
+    unsigned char character;
     int frequency;
     Node* left;
     Node* right;
 
-    // Constructor to create a new node
-    Node(char c, int freq) {
+    Node(unsigned char c, int freq) {
         character = c;
         frequency = freq;
         left = nullptr;
@@ -23,7 +23,7 @@ struct Node {
     }
 };
 
-// This is used to compare nodes in the priority queue
+// Compare nodes for priority queue
 struct Compare {
     bool operator()(Node* a, Node* b) {
         return a->frequency > b->frequency;
@@ -31,13 +31,11 @@ struct Compare {
 };
 
 // Function declarations
-void buildFrequencyMap(const std::string& text, std::unordered_map<char, int>& freqMap);
-Node* buildHuffmanTree(std::unordered_map<char, int>& freqMap);
-void buildCodes(Node* root, std::string code, std::unordered_map<char, std::string>& codes);
-std::string compress(const std::string& text, std::unordered_map<char, std::string>& codes);
-std::string decompress(const std::string& compressed, Node* root);
-void compressFile(const std::string& inputFile, const std::string& outputFile);
-void decompressFile(const std::string& inputFile, const std::string& outputFile, Node* root);
+void buildFrequencyMap(const std::vector<unsigned char>& data, std::unordered_map<unsigned char, int>& freqMap);
+Node* buildHuffmanTree(std::unordered_map<unsigned char, int>& freqMap);
+void buildCodes(Node* root, std::string code, std::unordered_map<unsigned char, std::string>& codes);
+std::string compress(const std::vector<unsigned char>& data, std::unordered_map<unsigned char, std::string>& codes);
+std::vector<unsigned char> decompress(const std::string& compressed, Node* root, int originalSize);
 void deleteTree(Node* root);
 
 #endif

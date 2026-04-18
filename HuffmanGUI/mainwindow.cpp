@@ -27,8 +27,14 @@ void MainWindow::setupUI() {
     titleLabel->setObjectName("titleLabel");
     mainLayout->addWidget(titleLabel);
 
+    // Subtitle
+    QLabel* subtitleLabel = new QLabel("Supports all file types — txt, pdf, jpg, mp3 and more!");
+    subtitleLabel->setAlignment(Qt::AlignCenter);
+    subtitleLabel->setObjectName("subtitleLabel");
+    mainLayout->addWidget(subtitleLabel);
+
     // Drop zone
-    dropLabel = new QLabel("📁 Drag & Drop File Here\nor click Browse");
+    dropLabel = new QLabel("📁 Drag & Drop Any File Here\nor click Browse");
     dropLabel->setAlignment(Qt::AlignCenter);
     dropLabel->setObjectName("dropLabel");
     dropLabel->setMinimumHeight(80);
@@ -39,7 +45,7 @@ void MainWindow::setupUI() {
     QLabel* inputLabel = new QLabel("Input File:");
     inputLabel->setFixedWidth(80);
     inputFileEdit = new QLineEdit();
-    inputFileEdit->setPlaceholderText("Select input file...");
+    inputFileEdit->setPlaceholderText("Select any file to compress...");
     browseInputBtn = new QPushButton("Browse");
     browseInputBtn->setObjectName("browseBtn");
     inputLayout->addWidget(inputLabel);
@@ -92,7 +98,7 @@ void MainWindow::setupUI() {
     mainLayout->addLayout(btnLayout);
 
     // Status label
-    statusLabel = new QLabel("Ready");
+    statusLabel = new QLabel("Ready — supports all file types!");
     statusLabel->setAlignment(Qt::AlignCenter);
     statusLabel->setObjectName("statusLabel");
     mainLayout->addWidget(statusLabel);
@@ -120,6 +126,11 @@ void MainWindow::applyStyles() {
             font-weight: bold;
             color: #89b4fa;
             padding: 10px;
+        }
+        #subtitleLabel {
+            font-size: 12px;
+            color: #6c7086;
+            padding: 2px;
         }
         #dropLabel {
             border: 2px dashed #89b4fa;
@@ -208,19 +219,19 @@ void MainWindow::dropEvent(QDropEvent* event) {
     if (!urls.isEmpty()) {
         inputFileEdit->setText(urls.first().toLocalFile());
         dropLabel->setStyleSheet("border: 2px dashed #89b4fa; border-radius: 10px; color: #89b4fa; font-size: 14px; padding: 20px;");
-        statusLabel->setText("File loaded: " + urls.first().toLocalFile());
+        statusLabel->setText("File loaded: " + urls.first().fileName());
     }
 }
 
 void MainWindow::browseInputFile() {
-    QString file = QFileDialog::getOpenFileName(this, "Select Input File");
+    QString file = QFileDialog::getOpenFileName(this, "Select Any File", "", "All Files (*.*)");
     if (!file.isEmpty()) {
         inputFileEdit->setText(file);
     }
 }
 
 void MainWindow::browseOutputFile() {
-    QString file = QFileDialog::getSaveFileName(this, "Select Output File");
+    QString file = QFileDialog::getSaveFileName(this, "Select Output File", "", "All Files (*.*)");
     if (!file.isEmpty()) {
         outputFileEdit->setText(file);
     }
@@ -243,42 +254,44 @@ void MainWindow::compressFile() {
         return;
     }
 
-    std::ifstream inFile(inputPath.toStdString());
+    // Read file as binary
+    std::ifstream inFile(inputPath.toStdString(), std::ios::binary);
     if (!inFile.is_open()) {
         statusLabel->setText("❌ Cannot open input file!");
         return;
     }
 
-    std::string text((std::istreambuf_iterator<char>(inFile)),
-                      std::istreambuf_iterator<char>());
+    std::vector<unsigned char> data((std::istreambuf_iterator<char>(inFile)),
+                                     std::istreambuf_iterator<char>());
     inFile.close();
 
-    std::unordered_map<char, int> freqMap;
-    buildFrequencyMap(text, freqMap);
+    if (data.empty()) {
+        statusLabel->setText("❌ File is empty!");
+        return;
+    }
+
+    // Build frequency map and tree
+    std::unordered_map<unsigned char, int> freqMap;
+    buildFrequencyMap(data, freqMap);
     Node* root = buildHuffmanTree(freqMap);
 
-    std::unordered_map<char, std::string> codes;
+    // Build codes
+    std::unordered_map<unsigned char, std::string> codes;
     buildCodes(root, "", codes);
 
-    std::string compressed = compress(text, codes);
+    // Compress
+    std::string compressed = compress(data, codes);
 
-    std::ofstream outFile(outputPath.toStdString());
+    // Write compressed file as binary
+    std::ofstream outFile(outputPath.toStdString(), std::ios::binary);
     outFile << compressed;
     outFile.close();
 
-    updateStats(text.size(), compressed.size());
+    updateStats(data.size(), compressed.size());
     statusLabel->setText("✅ File compressed successfully!");
     deleteTree(root);
 }
 
 void MainWindow::decompressFile() {
-    QString inputPath = inputFileEdit->text();
-    QString outputPath = outputFileEdit->text();
-
-    if (inputPath.isEmpty() || outputPath.isEmpty()) {
-        statusLabel->setText("⚠️ Please select input and output files!");
-        return;
-    }
-
-    statusLabel->setText("⚠️ Decompression requires original frequency data!");
+    statusLabel->setText("⚠️ Full decompression coming soon!");
 }
