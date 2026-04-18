@@ -12,7 +12,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
 MainWindow::~MainWindow() {}
 
 void MainWindow::setupUI() {
-    setWindowTitle("Huffman Compression Tool");
+    setWindowTitle("Compressor");
     setMinimumSize(600, 500);
 
     QWidget* central = new QWidget(this);
@@ -22,7 +22,7 @@ void MainWindow::setupUI() {
     mainLayout->setContentsMargins(30, 30, 30, 30);
 
     // Title
-    titleLabel = new QLabel("🗜️ Huffman Compression Tool");
+    titleLabel = new QLabel("🗜️ Compressor");
     titleLabel->setAlignment(Qt::AlignCenter);
     titleLabel->setObjectName("titleLabel");
     mainLayout->addWidget(titleLabel);

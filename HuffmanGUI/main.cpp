@@ -5,7 +5,7 @@ int main(int argc, char* argv[]) {
     QApplication app(argc, argv);
 
     // Set application info
-    app.setApplicationName("Huffman Compression Tool");
+    app.setApplicationName("Compressor");
     app.setApplicationVersion("1.0");
     app.setOrganizationName("thesooraj");
 
